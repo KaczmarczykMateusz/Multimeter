@@ -14,29 +14,29 @@ Description : Should work on other AVR too (Atmega8 and 32 tested)
 
 
 // PORT configuration
-#define LCD_RS_DIR		DDRB
-#define LCD_RS_PORT 	PORTB
-#define LCD_RS			(1 << PB0)
+#define LCD_RS_DIR		DDRD
+#define LCD_RS_PORT 	PORTD
+#define LCD_RS			(1 << PD2)
 
 #define LCD_E_DIR		DDRD
 #define LCD_E_PORT		PORTD
-#define LCD_E			(1 << PD7)
+#define LCD_E			(1 << PD3)
 
 #define LCD_DB4_DIR		DDRD
 #define LCD_DB4_PORT	PORTD
-#define LCD_DB4			(1 << PD6)
+#define LCD_DB4			(1 << PD4)
 
 #define LCD_DB5_DIR		DDRD
 #define LCD_DB5_PORT	PORTD
 #define LCD_DB5			(1 << PD5)
 
-#define LCD_DB6_DIR		DDRB
-#define LCD_DB6_PORT	PORTB
-#define LCD_DB6			(1 << PB7)
+#define LCD_DB6_DIR		DDRD
+#define LCD_DB6_PORT	PORTD
+#define LCD_DB6			(1 << PD6)
 
-#define LCD_DB7_DIR		DDRB
-#define LCD_DB7_PORT	PORTB
-#define LCD_DB7			(1 << PB6)
+#define LCD_DB7_DIR		DDRD
+#define LCD_DB7_PORT	PORTD
+#define LCD_DB7			(1 << PD7)
 
 // @brief Command definitions block
 #define HD44780_CLEAR			0x01	//@brief wipe entire display from what was displayed

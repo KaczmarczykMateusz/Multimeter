@@ -4,11 +4,10 @@
  Author      : Mateusz Kaczmarczyk
  Version     : Atmel AVR Atmega8
 			   External quartz 16MHz
- Description :
+ Description : Measure frequency and output it as Hz
  ============================================================================
  */
 #include "frequencyMeter.h"
-
 
 
 /*************************************************************************
@@ -32,26 +31,34 @@ ISR(TIMER1_CAPT_vect) {
  Purpose:	Initialise timer1 for frequency measurement without prescaler
  **************************************************************************/
 void freqMeasureInit(void) {
-	TIMSK |= (1<<TICIE1);			// Enable Input Capture Interrupts
-	TCNT1 = 0;						// Clear timer1 counter
-	ICR1 = 0;						// Clear timer1 Input Capture Register
-	TCCR1B = (1<<ICES1) | (1<<CS00);//Choose source of interrupt (ICP1) rising edge without prescaler, Start timer
+	ovfCount = 0;
+	freqCount = 0;
+
+	TIMER1_INPUT_CAPT_MODE;
+	TIMER1_OVERFLOW_MODE;
+	TIMER1_RISING_EDGE;
+	TIMER1_COUNT_CLR;
+	TIMER1_ICP_COUNT_CLR;
+	TIMER1_START;
 }
 
 /*************************************************************************
  Function:	measureFreq()
- Purpose:
- Returns: 0: In progress or error
- 	 	  1:
- 	 	  Any other: Frequency as Hz
+ Returns: 	Frequency as Hz
  **************************************************************************/
 uint32_t measureFreq(void) {
+	static uint32_t freqResTmp = 0;
 	if(ovfCount >= 244) {	//16Mhz clock without prescaler - timer1 will overflow 244.140625 times per second
 		//Count number of pulses per second:
-		uint64_t freqRes = (freqCount * 99940875) * 0.00000001f; //Number of pulses * part of second when it occurred (0.99940875)
+		//TODO: add (uint16_t)round((freqCount * 99940875) * 0.00000001f);
+		//TODO: in case function below is not working try to remove  from accuracy
+		uint32_t freqRes = ((uint64_t)freqCount * 99940875) * 0.00000001f; //Number of pulses * part of second when it occurred (0.99940875)
 		freqCount = 0;
 		ovfCount = 0;
-		return (uint32_t)freqRes;
+		TIMER1_COUNT_CLR;
+		TIMER1_ICP_COUNT_CLR;
+		freqResTmp = freqRes;
+		return freqRes;
 	}
-	return 0;
+	return freqResTmp;
 }

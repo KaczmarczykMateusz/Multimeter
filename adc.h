@@ -2,9 +2,11 @@
  ============================================================================
  Name        : adc.h
  Author      : Mateusz Kaczmarczyk
- Version     :
- Description : You can increase range with voltage divider
-			Calibration with ref_adc and ref_v
+ Version     : Atmega8 May be incompatibile with other Atmega
+ Description : Voltage measurement is with +/- 0.05V tolerance
+ 	 			You can increase range with voltage divider
+				Calibration with refLowAdc, refLowVolt
+				and refHighAdc, refHighVolt
  ============================================================================
  */
 #ifndef ADC_H
@@ -14,29 +16,44 @@
 #include <stdlib.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include <util/delay.h>
 
-//	@brief   definition ADCIN (ADC input)
+//@brief   definition ADCIN (ADC input)
 #define ADCIN PA7
 
-#define REF_VOL_256_V
+#define ADC_REF_VOL_256_V ADMUX  =  (1<<REFS1) | (1<<REFS0) 	//Internal 2.56V Voltage Reference with external capacitor at AREF pin
+#define ADC_REF_VOL_500_V ADMUX  =  (1<<REFS0) 				//Internal 5V Voltage Reference with external capacitor at AREF pin
 
-//  @brief  holding values  for ADC oversampling measurement
+#define ADC_ENABLE			ADCSRA |= (1<<ADEN) 							//ADC Enable
+#define ADC_PRESLCALER_128	ADCSRA |= (1<<ADPS0) | (1<<ADPS1) | (1<<ADPS2)	//ADC prescaler clk/128
+
+
+#define ADC_CHENNELS_CLEAR		ADMUX &= ~0x0F			//Sets turn off all ADC channels
+#define ADC_SINGLE_CONVERTION	ADCSRA |= (1<<ADSC);	//Perform single conversion
+#define ADC_WAIT				ADCSRA & (1<<ADSC)
+
+
+//@brief  holding values  for ADC oversampling measurement
 typedef struct {
 	// @brief   set value in the middle (not precise) of measure range which can be pre-stepped down with voltage divider
-	uint16_t ref_adc;
+	uint16_t refLowAdc;
 
 	// @brief   set value (volt) of ADC which set during measuring of ref_adc (multiply this value *100)
-	uint16_t ref_v;
+	uint16_t refLowVolt;
+
+	// @brief   set value in the middle (not precise) of measure range which can be pre-stepped down with voltage divider
+	uint16_t refHighAdc;
+
+	// @brief   set value (volt) of ADC which set during measuring of ref_adc (multiply this value *100)
+	uint16_t refHighVolt;
 
 	// @brief   voltage multiplied by *100
 	uint16_t adcVoltRaw;
 
-	// @brief  	digits to print as ASCII char before coma (xx. full volts)
-	char beforeComa[3];
+	// @brief  	digits to print before coma (xx. full volts)
+	uint16_t intPart;
 
-	// @brief   digits to print as ASCII char before coma (.xx of volts)
-	char afterComa[3];
+	// @brief   digits to print after coma (.xx of volts)
+	uint16_t fractPart;
 } TVOLT;
 
 /**
@@ -51,7 +68,7 @@ void adcInit(void);
  * @return  None, but modifies struct changing adcVoltRaw, beforeComa[] and afterComa[] values
  * @see     adcOversample()
  */
-TVOLT voltAdc(uint16_t adc);
+void voltAdc(uint16_t adc, TVOLT * voltTmp);
 
 /**
  * @brief    Single ADC measurement without oversamppling nor averaging

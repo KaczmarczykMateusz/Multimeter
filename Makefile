@@ -62,7 +62,7 @@ MCU = atmega8
 #         F_CPU = 16000000
 #         F_CPU = 18432000
 #         F_CPU = 20000000
-F_CPU = 8000000
+F_CPU = 16000000
 
 
 # Output format. (can be srec, ihex, binary)
@@ -83,7 +83,10 @@ OBJDIR = .
 SRC = $(TARGET).c \ 
 adc.c \
 lcd.c \
-frequencyMeter.c
+frequencyMeter.c \ 
+clock.c \ 
+generator.c \ 
+keyboard.c
 
 
 # List C++ source files here. (C dependencies are automatically generated.)
